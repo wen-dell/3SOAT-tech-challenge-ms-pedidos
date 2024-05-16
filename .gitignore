@@ -12,7 +12,6 @@
 gradlew
 /.gradle
 /build
-/build.gradle
 /gradle
 /bin
 /.idea
