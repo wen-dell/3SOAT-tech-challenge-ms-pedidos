@@ -15,7 +15,7 @@ public class ProdutoService {
 
     private final ProdutoApiClient produtoApiClient;
 
-    public Optional<ProdutoDTO> existsById(Long id) {
+    public Optional<ProdutoDTO> findById(Long id) {
         log.info("Buscando por id {}", id);
         ProdutoDTO produtoDTO = produtoApiClient.findById(id).getBody();
         return Optional.ofNullable(produtoDTO);

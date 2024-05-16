@@ -76,7 +76,7 @@ public class PedidoService {
 
     private void validateProductExisting(List<Produto> produtos) {
         log.info("Validando se a lista de produtos existe {}", produtos);
-        produtos.forEach(produto -> produtoService.existsById(produto.getId())
+        produtos.forEach(produto -> produtoService.findById(produto.getId())
                 .orElseThrow(() -> new ObjectNotFoundException("Produto não encontrado " + produto.getId())));
     }
 
