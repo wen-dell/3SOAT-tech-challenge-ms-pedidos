@@ -34,3 +34,6 @@ hs_err_pid*
 replay_pid*
 gradlew
 
+# Mac
+.DS_Store
+
