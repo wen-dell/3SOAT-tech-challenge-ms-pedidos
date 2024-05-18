@@ -58,12 +58,14 @@ public class PedidoService {
     }
 
     private void validateExistingClient(PedidoDTO pedidoDTO) {
-        Page<ClienteDTO> clienteDTO = clienteApiClient.list(pedidoDTO.getCliente().getId(), 0, 10).getBody();
-        log.info("Validando se cliente foi informado e se pode ser encontrado");
-        if (Objects.isNull(pedidoDTO.getCliente())) {
-            throw new ObjectNotFoundException("Cliente não informado.");
-        } else if (clienteDTO != null && clienteDTO.isEmpty()) {
-            throw new ObjectNotFoundException("Cliente não encontrado: " + pedidoDTO.getCliente().getId());
+        if (!Objects.isNull(pedidoDTO.getCliente()) && !Objects.isNull(pedidoDTO.getCliente().getId())) {
+            Page<ClienteDTO> clienteDTO = clienteApiClient.list(pedidoDTO.getCliente().getId(), 0, 10).getBody();
+            log.info("Validando se cliente foi informado e se pode ser encontrado");
+            if (Objects.isNull(pedidoDTO.getCliente())) {
+                throw new ObjectNotFoundException("Cliente não informado.");
+            } else if (clienteDTO != null && clienteDTO.isEmpty()) {
+                throw new ObjectNotFoundException("Cliente não encontrado: " + pedidoDTO.getCliente().getId());
+            }
         }
     }
 

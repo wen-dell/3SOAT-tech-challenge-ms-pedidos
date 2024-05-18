@@ -1,31 +1,28 @@
 package br.com.tech.challenge.api;
 
-
+import br.com.tech.challenge.api.client.ClienteApiClient;
 import br.com.tech.challenge.domain.dto.ClienteDTO;
 import br.com.tech.challenge.domain.dto.PedidoDTO;
 import br.com.tech.challenge.domain.dto.ProdutoDTO;
 import br.com.tech.challenge.domain.dto.StatusPedidoDTO;
-import br.com.tech.challenge.domain.entidades.Categoria;
-import br.com.tech.challenge.domain.entidades.Cliente;
-import br.com.tech.challenge.domain.entidades.FilaPedidos;
-import br.com.tech.challenge.domain.entidades.Produto;
-import br.com.tech.challenge.domain.entidades.Pedido;
+import br.com.tech.challenge.domain.entidades.*;
 import br.com.tech.challenge.domain.enums.StatusPedido;
-import br.com.tech.challenge.servicos.FilaPedidosService;
-import br.com.tech.challenge.servicos.PedidoService;
+import br.com.tech.challenge.servicos.ProdutoService;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.flywaydb.core.Flyway;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
-import org.mockito.Mock;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.web.servlet.MockMvc;
 
@@ -33,19 +30,15 @@ import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.Optional;
 
-import static org.hamcrest.Matchers.is;
-import static org.hamcrest.Matchers.equalTo;
-import static org.hamcrest.Matchers.hasSize;
-
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
-
-
+import static org.hamcrest.Matchers.*;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.when;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 
 @SpringBootTest(properties = "spring.flyway.clean-disabled=false")
@@ -57,13 +50,13 @@ class PedidoControllerTest {
     private MockMvc mockMvc;
 
     @Autowired
-    private ObjectMapper mapper;
+    private ObjectMapper objectMapper;
 
-    @Mock
-    private FilaPedidosService filaPedidosService;
+    @MockBean
+    private ClienteApiClient clienteApiClient;
 
-    @Mock
-    private PedidoService pedidoService;
+    @MockBean
+    private ProdutoService produtoService;
 
     private static final String ROTA_PEDIDOS = "/pedidos";
 
@@ -80,8 +73,12 @@ class PedidoControllerTest {
     @Test
     void shouldSavePedidoSuccess() throws Exception {
 
+        when(clienteApiClient.list(any(Long.class), any(Integer.class), any(Integer.class)))
+                .thenReturn(ResponseEntity.ok(setPageClienteDTO()));
+        when(produtoService.findById(any(Long.class))).thenReturn(Optional.of(setProdutoDTO()));
+
         mockMvc.perform(post(ROTA_PEDIDOS)
-                        .content(mapper.writeValueAsString(setPedidoDTO()))
+                        .content(objectMapper.writeValueAsString(setPedidoDTO()))
                         .contentType(MediaType.APPLICATION_JSON)
                         .accept(MediaType.APPLICATION_JSON))
                 .andDo(print())
@@ -114,7 +111,7 @@ class PedidoControllerTest {
 
 
         mockMvc.perform(post(ROTA_PEDIDOS)
-                        .content(mapper.writeValueAsString(pedidoDTO))
+                        .content(objectMapper.writeValueAsString(pedidoDTO))
                         .contentType(MediaType.APPLICATION_JSON)
                         .accept(MediaType.APPLICATION_JSON))
                 .andDo(print())
@@ -159,7 +156,7 @@ class PedidoControllerTest {
         StatusPedidoDTO statusPedidoDTO = new StatusPedidoDTO(StatusPedido.PRONTO);
 
         mockMvc.perform(put(ROTA_PEDIDOS.concat("/100/status"))
-                        .content(mapper.writeValueAsString(statusPedidoDTO))
+                        .content(objectMapper.writeValueAsString(statusPedidoDTO))
                         .contentType(MediaType.APPLICATION_JSON)
                         .accept(MediaType.APPLICATION_JSON))
                 .andExpect(status().isOk());
@@ -310,6 +307,12 @@ class PedidoControllerTest {
         categoria.setId(1L);
         categoria.setDescricao("Categoria de Produtos");
         return categoria;
+    }
+
+    private Page<ClienteDTO> setPageClienteDTO() {
+        Pageable pageable = PageRequest.of(0, 10);
+        List<ClienteDTO> listClienteDTO = List.of(setClienteDTO());
+        return new PageImpl<>(listClienteDTO, pageable, listClienteDTO.size());
     }
 
 }

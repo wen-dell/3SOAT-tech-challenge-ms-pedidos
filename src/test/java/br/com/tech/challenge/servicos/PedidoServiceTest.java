@@ -99,9 +99,9 @@ class PedidoServiceTest {
         var returnedPedido = setPedidoSemCliente();
         var returnedPedidoDTO = setPedidoSemClienteDTO();
 
-        when(pedidoRepository.save(any())).thenReturn(returnedPedido);
         when(clienteApiClient.list(any(Long.class), any(Integer.class), any(Integer.class))).thenReturn(ResponseEntity.ok(setPageClienteDTO()));
         when(produtoService.findById(any(Long.class))).thenReturn(Optional.of(setProdutoDTO()));
+        when(pedidoRepository.save(any())).thenReturn(returnedPedido);
         when(mapper.map(any(), any(Type.class))).thenReturn(Collections.singletonList(setProduto()));
 
         var pedido = pedidoService.save(returnedPedidoDTO);
