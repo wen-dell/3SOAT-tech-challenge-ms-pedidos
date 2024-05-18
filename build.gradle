@@ -133,6 +133,22 @@ jacocoTestCoverageVerification {
 	}
 }
 
+jacocoTestReport {
+	afterEvaluate {
+		classDirectories.setFrom(files(classDirectories.files.collect {
+			fileTree(dir: it, exclude: [
+					'br/com/tech/challenge/domain/dto/**',
+					'br/com/tech/challenge/domain/entidades/**',
+					'br/com/tech/challenge/domain/enums/**',
+					'br/com/tech/challenge/config/**',
+					'br/com/tech/challenge/api/exception/**',
+					'br/com/tech/challenge/bd/repositorios/**',
+					'br/com/tech/challenge/TechChallengeApplication.class'
+			])
+		}))
+	}
+}
+
 sonar {
 	properties {
 		property "sonar.projectKey", "tech-challenge"
