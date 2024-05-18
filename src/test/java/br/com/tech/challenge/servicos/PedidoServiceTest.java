@@ -100,8 +100,8 @@ class PedidoServiceTest {
         var returnedPedidoDTO = setPedidoSemClienteDTO();
 
         when(pedidoRepository.save(any())).thenReturn(returnedPedido);
-        //when(clienteService.existsById(any())).thenReturn(Boolean.TRUE);
-        //when(produtoService.findById(any())).thenReturn(Optional.of(setProduto()));
+        when(clienteApiClient.list(any(Long.class), any(Integer.class), any(Integer.class))).thenReturn(ResponseEntity.ok(setPageClienteDTO()));
+        when(produtoService.findById(any(Long.class))).thenReturn(Optional.of(setProdutoDTO()));
         when(mapper.map(any(), any(Type.class))).thenReturn(Collections.singletonList(setProduto()));
 
         var pedido = pedidoService.save(returnedPedidoDTO);
@@ -125,7 +125,7 @@ class PedidoServiceTest {
     void shouldValidateExistingClient() {
         var returnedPedidoDTO = setPedidoDTO();
         try {
-            //when(clienteService.existsById(any())).thenReturn(Boolean.FALSE);
+            when(clienteApiClient.list(any(Long.class), any(Integer.class), any(Integer.class))).thenReturn(ResponseEntity.ok(setPageClienteDTOEmpty()));
             pedidoService.save(returnedPedidoDTO);
         } catch (Exception e) {
             assertEquals(ObjectNotFoundException.class, e.getClass());
@@ -138,7 +138,7 @@ class PedidoServiceTest {
     void shouldValidateEmptyListProductsOrder() {
         try {
             var returnedPedidoDTO = setPedidoDTO();
-            //when(clienteService.existsById(any())).thenReturn(Boolean.TRUE);
+            when(clienteApiClient.list(any(Long.class), any(Integer.class), any(Integer.class))).thenReturn(ResponseEntity.ok(setPageClienteDTO()));
             returnedPedidoDTO.setProdutos(List.of());
             pedidoService.save(returnedPedidoDTO);
         } catch (Exception e) {
@@ -152,8 +152,8 @@ class PedidoServiceTest {
     void shouldValidateProductExisting() {
         var returnedPedidoDTO = setPedidoDTO();
         try {
-            //when(clienteService.existsById(any())).thenReturn(Boolean.TRUE);
-            //when(produtoService.findById(any())).thenReturn(Optional.empty());
+            when(clienteApiClient.list(any(Long.class), any(Integer.class), any(Integer.class))).thenReturn(ResponseEntity.ok(setPageClienteDTO()));
+            when(produtoService.findById(any(Long.class))).thenReturn(Optional.empty());
             when(mapper.map(any(), any(Type.class))).thenReturn(Collections.singletonList(setProduto()));
             pedidoService.save(returnedPedidoDTO);
         } catch (Exception e) {
@@ -218,6 +218,12 @@ class PedidoServiceTest {
         Pageable pageable = PageRequest.of(0, 10);
         List<ClienteDTO> listClienteDTO = List.of(setClienteDTO());
         return new PageImpl<>(listClienteDTO, pageable, listClienteDTO.size());
+    }
+
+    private Page<ClienteDTO> setPageClienteDTOEmpty() {
+        Pageable pageable = PageRequest.of(0, 10);
+        List<ClienteDTO> listClienteDTO = new ArrayList<>();
+        return new PageImpl<>(listClienteDTO, pageable, 0);
     }
 
     private Pedido setPedidoSemCliente() {
