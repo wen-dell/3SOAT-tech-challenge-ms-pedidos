@@ -21,7 +21,9 @@ import org.mockito.MockitoAnnotations;
 import org.modelmapper.ModelMapper;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
+import org.springframework.http.ResponseEntity;
 
 import java.lang.reflect.Type;
 import java.math.BigDecimal;
@@ -68,9 +70,9 @@ class PedidoServiceTest {
         var returnedPedido = setPedido();
         var returnedPedidoDTO = setPedidoDTO();
 
+        when(clienteApiClient.list(any(Long.class), any(Integer.class), any(Integer.class))).thenReturn(ResponseEntity.ok(setPageClienteDTO()));
+        when(produtoService.findById(any(Long.class))).thenReturn(Optional.of(setProdutoDTO()));
         when(pedidoRepository.save(any())).thenReturn(returnedPedido);
-        //when(clienteService.existsById(any())).thenReturn(Boolean.TRUE);
-        //when(produtoService.findById(any())).thenReturn(Optional.of(setProduto()));
         when(mapper.map(any(), any(Type.class))).thenReturn(Collections.singletonList(setProduto()));
 
         var pedido = pedidoService.save(returnedPedidoDTO);
@@ -131,9 +133,9 @@ class PedidoServiceTest {
         }
     }
 
-@DisplayName("Deve lançar exceção ao criar um pedido com lista de produtos vazia")
-@Test
-void shouldValidateEmptyListProductsOrder() {
+    @DisplayName("Deve lançar exceção ao criar um pedido com lista de produtos vazia")
+    @Test
+    void shouldValidateEmptyListProductsOrder() {
         try {
             var returnedPedidoDTO = setPedidoDTO();
             //when(clienteService.existsById(any())).thenReturn(Boolean.TRUE);
@@ -143,7 +145,7 @@ void shouldValidateEmptyListProductsOrder() {
             assertEquals(ObjectNotFoundException.class, e.getClass());
             assertEquals("Lista de produtos vazia", e.getMessage());
         }
-}
+    }
 
     @DisplayName("Deve lançar exceção ao criar um pedido com produto não encontrado")
     @Test
@@ -200,7 +202,7 @@ void shouldValidateEmptyListProductsOrder() {
     }
 
 
-        private Pedido setPedido() {
+    private Pedido setPedido() {
         return Pedido.builder()
                 .id(1L)
                 .senhaRetirada(123456)
@@ -210,6 +212,12 @@ void shouldValidateEmptyListProductsOrder() {
                 .statusPedido(StatusPedido.RECEBIDO)
                 .dataHora(LocalDateTime.now())
                 .build();
+    }
+
+    private Page<ClienteDTO> setPageClienteDTO() {
+        Pageable pageable = PageRequest.of(0, 10);
+        List<ClienteDTO> listClienteDTO = List.of(setClienteDTO());
+        return new PageImpl<>(listClienteDTO, pageable, listClienteDTO.size());
     }
 
     private Pedido setPedidoSemCliente() {
