@@ -94,11 +94,11 @@ jobs:
       - name: Deploys application using manifest files
         if: github.ref == 'refs/heads/main' && github.event_name == 'push'
         run: |
-          kubectl apply -f https://raw.githubusercontent.com/rafaelfelixmoraes/3SOAT-tech-challenge/main/k8s/application-tech-challenge.yaml
+          kubectl apply -f https://raw.githubusercontent.com/wen-dell/3SOAT-tech-challenge-ms-pedidos/main/k8s/application-tech-challenge.yaml
           sleep 5
-          kubectl apply -f https://raw.githubusercontent.com/rafaelfelixmoraes/3SOAT-tech-challenge/main/k8s/postgres-tech-challenge.yaml
+          kubectl apply -f https://raw.githubusercontent.com/wen-dell/3SOAT-tech-challenge-ms-pedidos/main/k8s/postgres-tech-challenge.yaml
           sleep 5
-          kubectl apply -f https://raw.githubusercontent.com/rafaelfelixmoraes/3SOAT-tech-challenge/main/k8s/redis-tech-challenge.yaml
+          kubectl apply -f https://raw.githubusercontent.com/wen-dell/3SOAT-tech-challenge-ms-pedidos/main/k8s/redis-tech-challenge.yaml
           sleep 5
       
       # Deploys application based on given manifest file
