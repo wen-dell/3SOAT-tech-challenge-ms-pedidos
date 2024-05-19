@@ -48,5 +48,6 @@ security:
   jwt:
     expiracao: 1440
     chave-assinatura: dHLDqnMgcHJhdG9zIGRlIHRyaWdvIHBhcmEgdHLDqnMgdGlncmVzIGZhbWludG9z
+
 server:
   port: 8082
