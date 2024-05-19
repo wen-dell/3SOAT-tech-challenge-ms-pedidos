@@ -1,5 +1,6 @@
 package br.com.tech.challenge.servicos;
 
+import br.com.tech.challenge.api.exception.ObjectNotFoundException;
 import br.com.tech.challenge.bd.repositorios.PagamentoRepository;
 import br.com.tech.challenge.bd.repositorios.PedidoRepository;
 import br.com.tech.challenge.domain.entidades.*;
@@ -78,6 +79,32 @@ class PagamentoServiceTest {
         assertEquals(new BigDecimal("10.00"), returnedPagamento.getValorTotal());
         assertNull(returnedPagamento.getQrData());
         assertEquals(StatusPagamento.AGUARDANDO_PAGAMENTO, returnedPagamento.getStatusPagamento());
+    }
+
+    @DisplayName("Deve fazer o checkout")
+    @Test
+    void shouldDoCheckout() {
+        var clock = Clock.fixed(Instant.now(), ZoneId.systemDefault());
+        var pagamento = setPagamento(clock);
+        var pedido = setPedido();
+
+        pedido = pedido.toBuilder().statusPedido(StatusPedido.EM_PREPARACAO).build();
+        pagamento = pagamento.toBuilder().pedido(pedido).build();
+
+        final Long idPedido = 1L;
+
+        when(pedidoRepository.findById(idPedido)).thenReturn(Optional.of(pedido));
+        when(pagamentoRepository.findPagamentoByPedidoId(idPedido)).thenReturn(Optional.of(pagamento));
+        when(pagamentoRepository.save(any())).thenReturn(pagamento.toBuilder()
+                .statusPagamento(StatusPagamento.PAGO)
+                .dataHoraPagamento(LocalDateTime.now(clock))
+                .build()
+        );
+
+        var returnedPagamento = pagamentoService.checkout(idPedido);
+        assertEquals(StatusPagamento.PAGO, returnedPagamento.getStatusPagamento());
+        assertNotNull(returnedPagamento.getDataHoraPagamento());
+        assertEquals(StatusPedido.EM_PREPARACAO, returnedPagamento.getPedido().getStatusPedido());
     }
 
     private Pagamento setPagamento(Clock clock) {

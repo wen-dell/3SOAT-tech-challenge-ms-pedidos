@@ -1,0 +1,108 @@
+name: Build and deploy an app to AKS
+
+on:
+  push:
+    branches: ["main"]
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  pull-requests: read # allows SonarCloud to decorate PRs with analysis results
+
+env:
+  AZURE_CONTAINER_REGISTRY: "acrrepository"
+  RESOURCE_GROUP: "tc-g8-resources"
+  CLUSTER_NAME: "tech-challenge-k8s"
+  DEPLOYMENT_MANIFEST_PATH: "https://raw.githubusercontent.com/rafaelfelixmoraes/3SOAT-tech-challenge/main/k8s/"
+  SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
+
+jobs:
+  deploy:
+    permissions:
+      contents: read
+      id-token: write
+    runs-on: ubuntu-latest
+    steps:
+      # Checks out the repository this file is in
+      - name: Set up github checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0  # Shallow clones should be disabled for a better relevancy of analysis
+
+      # Setup JDK 17
+      - name: Set up JDK 17
+        uses: actions/setup-java@v4
+        with:
+          java-version: '17'
+          distribution: 'temurin'
+
+      # Configure Caches for SonarCloud e Gradle
+      - name: Cache SonarCloud packages
+        uses: actions/cache@v4
+        with:
+            path: ~/.sonar/cache
+            key: ${{ runner.os }}-sonar
+            restore-keys: ${{ runner.os }}-sonar
+
+      - name: Cache Gradle packages
+        uses: actions/cache@v4
+        with:
+            path: ~/.gradle/caches
+            key: ${{ runner.os }}-gradle-${{ hashFiles('**/*.gradle') }}
+            restore-keys: ${{ runner.os }}-gradle
+
+      # Configure Gradle for optimal use in GiHub Actions, including caching of downloaded dependencies.
+      # See: https://github.com/gradle/actions/blob/main/setup-gradle/README.md
+      - name: Setup Gradle
+        uses: gradle/actions/setup-gradle@v3
+        with:
+            gradle-version: '8.3'
+
+      # Gradle build with SonarCloud integration
+      - name: Build with Gradle 8.3
+        run: gradle clean build sonar --info
+
+      # Logs in with your Azure credentials
+      - name: Azure login
+        uses: azure/login@v1.6.1
+        with:
+          client-id: ${{ secrets.AZURE_CLIENT_ID }}
+          tenant-id: ${{ secrets.AZURE_TENANT_ID }}
+          subscription-id: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
+      
+      - name: Set up kubelogin for non-interactive login
+        uses: azure/use-kubelogin@v1
+        with:
+          kubelogin-version: 'v0.0.25'
+
+      # Retrieves your Azure Kubernetes Service cluster's kubeconfig file
+      - name: Get K8s context
+        if: github.ref == 'refs/heads/main'
+        uses: azure/aks-set-context@v3
+        with:
+          resource-group: ${{ env.RESOURCE_GROUP }}
+          cluster-name: ${{ env.CLUSTER_NAME }}
+          admin: 'true'
+          use-kubelogin: 'true'
+
+      - name: Testing Cluster to check context
+        if: github.ref == 'refs/heads/main'
+        run: |
+          kubectl cluster-info
+          kubectl get nodes
+      - name: Deploys application using manifest files
+        if: github.ref == 'refs/heads/main' && github.event_name == 'push'
+        run: |
+          kubectl apply -f https://raw.githubusercontent.com/wen-dell/3SOAT-tech-challenge-ms-pedidos/main/k8s/application-tech-challenge.yaml
+          sleep 5
+          kubectl apply -f https://raw.githubusercontent.com/wen-dell/3SOAT-tech-challenge-ms-pedidos/main/k8s/postgres-tech-challenge.yaml
+          sleep 5
+          kubectl apply -f https://raw.githubusercontent.com/wen-dell/3SOAT-tech-challenge-ms-pedidos/main/k8s/redis-tech-challenge.yaml
+          sleep 5
+      
+      # Deploys application based on given manifest file
+      #- name: Deploys application with Azure deploy
+      #  uses: Azure/k8s-deploy@v4
+      #  with:
+      #    action: deploy
+      #    manifests: ${{ env.DEPLOYMENT_MANIFEST_PATH }}
