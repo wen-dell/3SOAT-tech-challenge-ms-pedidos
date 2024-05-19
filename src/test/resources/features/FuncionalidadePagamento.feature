@@ -1,6 +1,6 @@
 # language: pt
 
-Funcionalidade: API Produto
+Funcionalidade: API Pagamento
 
   Cenário: Realizar um checkout
     Quando realizar um checkout
