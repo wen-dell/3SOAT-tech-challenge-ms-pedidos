@@ -75,11 +75,15 @@ dependencies {
 	// OpenFeign
 	implementation group: 'org.springframework.cloud', name: 'spring-cloud-starter-openfeign', version: '4.0.4'
 
-	// Cucumber
-	testImplementation group: 'io.cucumber', name: 'cucumber-junit', version: '7.14.0'
-	implementation group: 'io.cucumber', name: 'cucumber-java', version: '7.14.0'
-	implementation group: 'io.cucumber', name: 'cucumber-spring', version: '7.14.0'
-
+	//BDD
+	testImplementation 'io.cucumber:cucumber-java:7.17.0'
+	testImplementation 'io.cucumber:cucumber-junit:7.17.0'
+	testImplementation 'io.cucumber:cucumber-junit-platform-engine:7.17.0'
+	testImplementation 'org.junit.platform:junit-platform-suite-api:1.9.3'
+	testImplementation('io.rest-assured:rest-assured:5.4.0') {
+		exclude group: 'org.codehaus.groovy', module: 'groovy'
+		exclude group: 'org.codehaus.groovy', module: 'groovy-xml'
+	}
 }
 
 flyway {
