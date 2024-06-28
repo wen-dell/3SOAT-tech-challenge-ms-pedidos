@@ -1,4 +1,4 @@
-FROM openjdk:17-alpine
+FROM amazoncorretto:17-alpine3.17-jdk
 
 MAINTAINER 2023_3SOAT-Dev_Rise_G8
 
