@@ -12,6 +12,7 @@ import br.com.tech.challenge.domain.entidades.Pagamento;
 import br.com.tech.challenge.domain.entidades.Pedido;
 import br.com.tech.challenge.domain.enums.StatusPagamento;
 import br.com.tech.challenge.domain.enums.StatusPedido;
+import br.com.tech.challenge.utils.QRCodeGeneratorUtils;
 import lombok.Generated;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -50,18 +51,23 @@ public class PagamentoService {
 
     @Transactional
     @Generated
-    public MercadoPagoResponseDTO generateQRCode(Long idPedido) {
+    public byte[] generateQRCode(Long idPedido) {
+        final int QR_CODE_WIDTH = 300;
+        final int QR_CODE_HEIGHT = 300;
+
         var pedido = getPedido(idPedido);
         var requestDTO = buildMercadoPagoRequestDTO(pedido);
         log.info("Chamando client para gerar QR Code");
         var responseDTO = mercadoPagoClient.generateQRCode(requestDTO);
+
+        byte[] qrCodeImage = QRCodeGeneratorUtils.getQRCodeImage(responseDTO.getQrData(), QR_CODE_WIDTH, QR_CODE_HEIGHT);
 
         var pagamento = findPagamentoByPedidoId(pedido.getId());
         pagamento.setQrData(responseDTO.getQrData());
 
         log.info("Salvando pagamento");
         pagamentoRepository.save(pagamento);
-        return responseDTO;
+        return qrCodeImage;
     }
 
     @Transactional

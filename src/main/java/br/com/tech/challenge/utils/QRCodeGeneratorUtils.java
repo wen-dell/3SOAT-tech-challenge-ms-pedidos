@@ -31,7 +31,6 @@ public class QRCodeGeneratorUtils {
         } catch (WriterException | IOException exception) {
             throw new QRCodeGenerationException("Ocorreu um erro ao gerar o QR Code: " + exception.getMessage());
         }
-
     }
 
 }
