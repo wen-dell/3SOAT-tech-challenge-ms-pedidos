@@ -16,6 +16,7 @@ import br.com.tech.challenge.utils.QRCodeGeneratorUtils;
 import lombok.Generated;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -36,6 +37,9 @@ public class PagamentoService {
     private final PedidoRepository pedidoRepository;
 
     private final ProdutoService produtoService;
+
+    @Value("${app.url}")
+    private String appUrl;
 
     @Transactional
     public Pagamento save(Pedido pedido) {
@@ -108,6 +112,7 @@ public class PagamentoService {
         });
 
         log.info("Retornando MercadoPagoRequestDTO");
+
         return MercadoPagoRequestDTO.builder()
                 .externalReference(pedido.getSenhaRetirada().toString())
                 .title("Ordem de pedido")
@@ -115,6 +120,7 @@ public class PagamentoService {
                 .totalAmount(pagamento.getValorTotal().multiply(BigDecimal.valueOf(2L)))
                 .items(items)
                 .cashOut(CashOutDTO.builder().amount(pagamento.getValorTotal()).build())
+                .notificationUrl(buildNotificationUrl(pedido.getId()))
                 .build();
     }
 
@@ -128,6 +134,11 @@ public class PagamentoService {
     private Pedido getPedido(Long idPedido) {
         log.info("Buscando pedido por id {}", idPedido);
         return pedidoRepository.findById(idPedido).orElseThrow(() -> new ObjectNotFoundException("Pedido não encontrado."));
+    }
+
+    @Generated
+    private String buildNotificationUrl(Long idPedido) {
+        return appUrl + String.format("/pagamentos/pedido/%d/checkout", idPedido);
     }
 
 }
