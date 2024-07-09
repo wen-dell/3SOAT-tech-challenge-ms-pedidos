@@ -41,6 +41,7 @@ public class ExceptionHandlerAdvice {
 
 
     @ExceptionHandler(StatusPedidoInvalidoException.class)
+    @ResponseStatus(HttpStatus.BAD_REQUEST)
     public ResponseEntity<ResponseExceptionDTO> handleStatusPedidoInvalidoException(StatusPedidoInvalidoException exception) {
         return ResponseEntity.status(HttpStatus.BAD_REQUEST)
                 .body(ResponseExceptionDTO.builder()

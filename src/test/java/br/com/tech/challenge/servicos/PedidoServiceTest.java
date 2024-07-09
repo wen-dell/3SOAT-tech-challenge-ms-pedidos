@@ -147,7 +147,7 @@ class PedidoServiceTest {
         }
     }
 
-    @DisplayName("Deve lançar exceção ao criar um pedido com produto não encontrado")
+    @DisplayName("Deve lançar excecao ao criar um pedido com produto não encontrado")
     @Test
     void shouldValidateProductExisting() {
         var returnedPedidoDTO = setPedidoDTO();

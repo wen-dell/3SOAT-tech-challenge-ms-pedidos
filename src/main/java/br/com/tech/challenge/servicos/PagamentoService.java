@@ -52,14 +52,13 @@ public class PagamentoService {
     @Transactional
     @Generated
     public byte[] generateQRCode(Long idPedido) {
-        final int QR_CODE_WIDTH = 300;
-        final int QR_CODE_HEIGHT = 300;
-
         var pedido = getPedido(idPedido);
         var requestDTO = buildMercadoPagoRequestDTO(pedido);
         log.info("Chamando client para gerar QR Code");
         var responseDTO = mercadoPagoClient.generateQRCode(requestDTO);
 
+        final int QR_CODE_WIDTH = 300;
+        final int QR_CODE_HEIGHT = 300;
         byte[] qrCodeImage = QRCodeGeneratorUtils.getQRCodeImage(responseDTO.getQrData(), QR_CODE_WIDTH, QR_CODE_HEIGHT);
 
         var pagamento = findPagamentoByPedidoId(pedido.getId());

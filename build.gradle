@@ -88,6 +88,8 @@ dependencies {
 		exclude group: 'org.codehaus.groovy', module: 'groovy'
 		exclude group: 'org.codehaus.groovy', module: 'groovy-xml'
 	}
+	// Mockito inline
+	testImplementation 'org.mockito:mockito-inline:5.2.0'
 }
 
 flyway {
