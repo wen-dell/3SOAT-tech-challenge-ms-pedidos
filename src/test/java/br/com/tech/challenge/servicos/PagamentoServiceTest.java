@@ -1,6 +1,6 @@
 package br.com.tech.challenge.servicos;
 
-import br.com.tech.challenge.api.exception.ObjectNotFoundException;
+import br.com.tech.challenge.api.client.MercadoPagoClient;
 import br.com.tech.challenge.bd.repositorios.PagamentoRepository;
 import br.com.tech.challenge.bd.repositorios.PedidoRepository;
 import br.com.tech.challenge.domain.entidades.*;
@@ -28,6 +28,9 @@ class PagamentoServiceTest {
     private final PagamentoService pagamentoService;
 
     @Mock
+    private MercadoPagoClient mercadoPagoClient;
+
+    @Mock
     private PagamentoRepository pagamentoRepository;
 
     @Mock
@@ -39,8 +42,10 @@ class PagamentoServiceTest {
     PagamentoServiceTest() {
         MockitoAnnotations.openMocks(this);
         this.pagamentoService = new PagamentoService(
+                mercadoPagoClient,
                 pagamentoRepository,
-                pedidoRepository
+                pedidoRepository,
+                produtoService
         );
     }
 

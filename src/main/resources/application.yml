@@ -51,3 +51,6 @@ security:
 
 server:
   port: 8082
+
+app:
+  url: http://localhost:8082

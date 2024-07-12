@@ -30,24 +30,46 @@ public class ExceptionHandlerAdvice {
 
     @ExceptionHandler(ObjectNotFoundException.class)
     @ResponseStatus(HttpStatus.NOT_FOUND)
-    protected ResponseEntity<ResponseExceptionDTO> handleObjectNotFoundException(ObjectNotFoundException exception) {
+    public ResponseEntity<ResponseExceptionDTO> handleObjectNotFoundException(ObjectNotFoundException exception) {
         return ResponseEntity.status(HttpStatus.NOT_FOUND).body(
-                        ResponseExceptionDTO.builder()
-                                .exceptionMessage(exception.getMessage())
-                                .messages(null)
-                                .statusCode(HttpStatus.NOT_FOUND.value())
-                                .build()
-        );
+                ResponseExceptionDTO.builder()
+                        .exceptionMessage(exception.getMessage())
+                        .messages(null)
+                        .statusCode(HttpStatus.NOT_FOUND.value())
+                        .build());
     }
 
 
     @ExceptionHandler(StatusPedidoInvalidoException.class)
+    @ResponseStatus(HttpStatus.BAD_REQUEST)
     public ResponseEntity<ResponseExceptionDTO> handleStatusPedidoInvalidoException(StatusPedidoInvalidoException exception) {
         return ResponseEntity.status(HttpStatus.BAD_REQUEST)
                 .body(ResponseExceptionDTO.builder()
                         .exceptionMessage(exception.getMessage())
                         .messages(null)
                         .statusCode(HttpStatus.BAD_REQUEST.value())
+                        .build());
+    }
+
+    @ExceptionHandler(MercadoPagoAPIException.class)
+    @ResponseStatus(HttpStatus.BAD_REQUEST)
+    public ResponseEntity<ResponseExceptionDTO> handleMercadoPagoAPIException(MercadoPagoAPIException exception) {
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(
+                ResponseExceptionDTO.builder()
+                        .exceptionMessage(exception.getMessage())
+                        .messages(null)
+                        .statusCode(HttpStatus.BAD_REQUEST.value())
+                        .build());
+    }
+
+    @ExceptionHandler(QRCodeGenerationException.class)
+    @ResponseStatus(HttpStatus.INTERNAL_SERVER_ERROR)
+    public ResponseEntity<ResponseExceptionDTO> handleQRCodeGenerationException(QRCodeGenerationException exception) {
+        return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                .body(ResponseExceptionDTO.builder()
+                        .exceptionMessage(exception.getMessage())
+                        .messages(null)
+                        .statusCode(HttpStatus.INTERNAL_SERVER_ERROR.value())
                         .build());
     }
 
