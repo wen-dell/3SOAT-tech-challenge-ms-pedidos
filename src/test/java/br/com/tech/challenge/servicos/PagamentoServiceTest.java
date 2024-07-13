@@ -21,6 +21,8 @@ import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyLong;
+import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.when;
 
 class PagamentoServiceTest {
@@ -39,13 +41,17 @@ class PagamentoServiceTest {
     @Mock
     private ProdutoService produtoService;
 
+    @Mock
+    private CozinhaTopicProducer cozinhaTopicProducer;
+
     PagamentoServiceTest() {
         MockitoAnnotations.openMocks(this);
         this.pagamentoService = new PagamentoService(
                 mercadoPagoClient,
                 pagamentoRepository,
                 pedidoRepository,
-                produtoService
+                produtoService,
+                cozinhaTopicProducer
         );
     }
 
@@ -98,6 +104,7 @@ class PagamentoServiceTest {
 
         final Long idPedido = 1L;
 
+        doNothing().when(cozinhaTopicProducer).enviarPedidoParaCozinha(anyLong());
         when(pedidoRepository.findById(idPedido)).thenReturn(Optional.of(pedido));
         when(pagamentoRepository.findPagamentoByPedidoId(idPedido)).thenReturn(Optional.of(pagamento));
         when(pagamentoRepository.save(any())).thenReturn(pagamento.toBuilder()

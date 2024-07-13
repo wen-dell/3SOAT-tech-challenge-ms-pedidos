@@ -38,6 +38,8 @@ public class PagamentoService {
 
     private final ProdutoService produtoService;
 
+    private final CozinhaTopicProducer cozinhaTopicProducer;
+
     @Value("${app.url}")
     private String appUrl;
 
@@ -86,7 +88,12 @@ public class PagamentoService {
         log.info("Alterando status do pedido para EM_PREPARACAO");
         pedido.setStatusPedido(StatusPedido.EM_PREPARACAO);
         pedidoRepository.save(pedido);
-        return pagamentoRepository.save(pagamento);
+        final var pagamentoSaved = pagamentoRepository.save(pagamento);
+
+        log.info("Enviando pedido {} para cozinha", pagamentoSaved.getPedido().getId());
+        cozinhaTopicProducer.enviarPedidoParaCozinha(pagamentoSaved.getId());
+
+        return pagamentoSaved;
     }
 
     @Generated
