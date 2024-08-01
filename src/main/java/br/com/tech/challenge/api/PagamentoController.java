@@ -10,10 +10,7 @@ import lombok.RequiredArgsConstructor;
 import org.modelmapper.ModelMapper;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 @RestController
 @RequiredArgsConstructor
@@ -43,8 +40,8 @@ public class PagamentoController {
             @ApiResponse(responseCode = "404", description = "Pedido não encontrado."),
             @ApiResponse(responseCode = "500", description = "Ocorreu um erro no servidor.")
     })
-    @PostMapping("/pedido/{idPedido}/checkout")
-    public ResponseEntity<PagamentoDTO> checkout(@PathVariable("idPedido") Long id) {
+    @PostMapping("/pedido/checkout")
+    public ResponseEntity<PagamentoDTO> checkout(@RequestParam("idPedido") Long id) {
         var pagamento = pagamentoService.checkout(id);
         return ResponseEntity.ok().body(mapper.map(pagamento, PagamentoDTO.class));
     }

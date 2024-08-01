@@ -27,6 +27,4 @@ public class MercadoPagoRequestDTO {
 
     private CashOutDTO cashOut;
 
-    private String notificationUrl;
-
 }

@@ -7,7 +7,6 @@ import br.com.tech.challenge.bd.repositorios.PedidoRepository;
 import br.com.tech.challenge.domain.dto.external.CashOutDTO;
 import br.com.tech.challenge.domain.dto.external.ItemDTO;
 import br.com.tech.challenge.domain.dto.external.MercadoPagoRequestDTO;
-import br.com.tech.challenge.domain.dto.external.MercadoPagoResponseDTO;
 import br.com.tech.challenge.domain.entidades.Pagamento;
 import br.com.tech.challenge.domain.entidades.Pedido;
 import br.com.tech.challenge.domain.enums.StatusPagamento;
@@ -75,7 +74,7 @@ public class PagamentoService {
 
     @Transactional
     public Pagamento checkout(Long idPedido) {
-        log.info("Checkout de pedido {}", idPedido);
+        log.info("Checkout de pedido [via integracao MercadoPago] {}", idPedido);
         var pedido = getPedido(idPedido);
         var pagamento = findPagamentoByPedidoId(pedido.getId());
 
@@ -120,7 +119,6 @@ public class PagamentoService {
                 .totalAmount(pagamento.getValorTotal().multiply(BigDecimal.valueOf(2L)))
                 .items(items)
                 .cashOut(CashOutDTO.builder().amount(pagamento.getValorTotal()).build())
-                .notificationUrl(buildNotificationUrl(pedido.getId()))
                 .build();
     }
 
@@ -134,11 +132,6 @@ public class PagamentoService {
     private Pedido getPedido(Long idPedido) {
         log.info("Buscando pedido por id {}", idPedido);
         return pedidoRepository.findById(idPedido).orElseThrow(() -> new ObjectNotFoundException("Pedido não encontrado."));
-    }
-
-    @Generated
-    private String buildNotificationUrl(Long idPedido) {
-        return appUrl + String.format("/pagamentos/pedido/%d/checkout", idPedido);
     }
 
 }
