@@ -31,6 +31,11 @@ spring:
     properties:
       dialect: org.hibernate.dialect.PostgreSQL9Dialect
       use_jdbc_metadata_defaults: false
+  kafka:
+    bootstrap-servers:
+      - localhost:29092
+    producer:
+      value-serializer: org.springframework.kafka.support.serializer.JsonSerializer
 
 logging:
   level:
