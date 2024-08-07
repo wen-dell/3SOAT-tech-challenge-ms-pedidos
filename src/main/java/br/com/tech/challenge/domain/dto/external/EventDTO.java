@@ -4,27 +4,28 @@ import com.fasterxml.jackson.databind.PropertyNamingStrategies;
 import com.fasterxml.jackson.databind.annotation.JsonNaming;
 import lombok.*;
 
-import java.math.BigDecimal;
-import java.util.List;
-
 @Getter
 @Setter
 @AllArgsConstructor
 @NoArgsConstructor
 @Builder
 @JsonNaming(PropertyNamingStrategies.SnakeCaseStrategy.class)
-public class MercadoPagoRequestDTO {
+public class EventDTO {
 
-    private String externalReference;
+    private Long id;
 
-    private String title;
+    private boolean liveMode;
 
-    private String description;
+    private String type;
 
-    private BigDecimal totalAmount;
+    private String dateCreated;
 
-    private List<ItemDTO> items;
+    private Long userId;
 
-    private CashOutDTO cashOut;
+    private String apiVersion;
+
+    private String action;
+
+    private DataDTO data;
 
 }

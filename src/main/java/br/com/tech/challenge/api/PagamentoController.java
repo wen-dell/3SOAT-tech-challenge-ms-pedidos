@@ -1,6 +1,7 @@
 package br.com.tech.challenge.api;
 
 import br.com.tech.challenge.domain.dto.PagamentoDTO;
+import br.com.tech.challenge.domain.dto.external.EventDTO;
 import br.com.tech.challenge.servicos.PagamentoService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
@@ -10,10 +11,7 @@ import lombok.RequiredArgsConstructor;
 import org.modelmapper.ModelMapper;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 @RestController
 @RequiredArgsConstructor
@@ -43,9 +41,9 @@ public class PagamentoController {
             @ApiResponse(responseCode = "404", description = "Pedido não encontrado."),
             @ApiResponse(responseCode = "500", description = "Ocorreu um erro no servidor.")
     })
-    @PostMapping("/pedido/{idPedido}/checkout")
-    public ResponseEntity<PagamentoDTO> checkout(@PathVariable("idPedido") Long id) {
-        var pagamento = pagamentoService.checkout(id);
+    @PostMapping("/checkout")
+    public ResponseEntity<PagamentoDTO> checkout(@RequestBody EventDTO event) {
+        var pagamento = pagamentoService.checkout(event);
         return ResponseEntity.ok().body(mapper.map(pagamento, PagamentoDTO.class));
     }
 

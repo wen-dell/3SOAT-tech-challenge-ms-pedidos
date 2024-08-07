@@ -5,11 +5,11 @@ import lombok.AllArgsConstructor;
 @AllArgsConstructor
 public enum MercadoPagoAPI {
 
-    ACCESS_TOKEN("Bearer APP_USR-6155129762548657-102711-6c6e3574529dbc4e6d5944056bb132db-700064145"),
+    ACCESS_TOKEN("Bearer TEST-6621802098599609-102118-84e7d61f11ef646bbaf89a78e1bb2631-700064145"),
 
     MERCADO_PAGO_URL("https://api.mercadopago.com"),
 
-    CAIXA_PAGAMENTO_ID("CAIXA001"),
+    CAIXA_PAGAMENTO_ID("CAIXA003"),
 
     USER_ID("700064145");
 
@@ -23,6 +23,10 @@ public enum MercadoPagoAPI {
         return String.format("/instore/orders/qr/seller/collectors/%s/pos/%s/qrs",
                 MercadoPagoAPI.USER_ID.text(), MercadoPagoAPI.CAIXA_PAGAMENTO_ID.text()
         );
+    }
+
+    public static String getMerchantOrderUrl(String id) {
+        return String.format("/merchant_orders/%s", id);
     }
 
 }

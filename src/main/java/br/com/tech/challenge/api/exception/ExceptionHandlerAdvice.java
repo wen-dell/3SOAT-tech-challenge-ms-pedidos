@@ -85,4 +85,14 @@ public class ExceptionHandlerAdvice {
                         .build());
     }
 
+    @ExceptionHandler(PedidoNotFoundException.class)
+    public ResponseEntity<ResponseExceptionDTO> handleInvalidCpfException(PedidoNotFoundException exception) {
+        return ResponseEntity.status(HttpStatus.NOT_FOUND)
+                .body(ResponseExceptionDTO.builder()
+                        .exceptionMessage(exception.getMessage())
+                        .messages(null)
+                        .statusCode(HttpStatus.NOT_FOUND.value())
+                        .build());
+    }
+
 }

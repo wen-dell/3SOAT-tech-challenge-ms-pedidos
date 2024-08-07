@@ -3,6 +3,9 @@ package br.com.tech.challenge.servicos;
 import br.com.tech.challenge.api.client.MercadoPagoClient;
 import br.com.tech.challenge.bd.repositorios.PagamentoRepository;
 import br.com.tech.challenge.bd.repositorios.PedidoRepository;
+import br.com.tech.challenge.domain.dto.external.DataDTO;
+import br.com.tech.challenge.domain.dto.external.EventDTO;
+import br.com.tech.challenge.domain.dto.external.MerchantOrderDTO;
 import br.com.tech.challenge.domain.entidades.*;
 import br.com.tech.challenge.domain.enums.StatusPagamento;
 import br.com.tech.challenge.domain.enums.StatusPedido;
@@ -101,19 +104,27 @@ class PagamentoServiceTest {
 
         pedido = pedido.toBuilder().statusPedido(StatusPedido.EM_PREPARACAO).build();
         pagamento = pagamento.toBuilder().pedido(pedido).build();
+        pedido = pedido.toBuilder().pagamento(Pagamento.builder()
+                .id(1L)
+                .pedido(setPedido())
+                .dataHoraPagamento(LocalDateTime.now(clock))
+                .valorTotal(new BigDecimal("10.00"))
+                .qrData(null)
+                .statusPagamento(StatusPagamento.AGUARDANDO_PAGAMENTO)
+                .build()).build();
 
-        final Long idPedido = 1L;
+        String id = "999999999";
 
         doNothing().when(cozinhaTopicProducer).enviarPedidoParaCozinha(anyLong());
-        when(pedidoRepository.findById(idPedido)).thenReturn(Optional.of(pedido));
-        when(pagamentoRepository.findPagamentoByPedidoId(idPedido)).thenReturn(Optional.of(pagamento));
+        when(mercadoPagoClient.getMerchantOrder(id)).thenReturn(setMerchantOrderDTO());
+        when(pedidoRepository.findBySenhaRetirada(setPedido().getSenhaRetirada())).thenReturn(Optional.of(pedido));
         when(pagamentoRepository.save(any())).thenReturn(pagamento.toBuilder()
                 .statusPagamento(StatusPagamento.PAGO)
                 .dataHoraPagamento(LocalDateTime.now(clock))
                 .build()
         );
 
-        var returnedPagamento = pagamentoService.checkout(idPedido);
+        var returnedPagamento = pagamentoService.checkout(setEventDTO());
         assertEquals(StatusPagamento.PAGO, returnedPagamento.getStatusPagamento());
         assertNotNull(returnedPagamento.getDataHoraPagamento());
         assertEquals(StatusPedido.EM_PREPARACAO, returnedPagamento.getPedido().getStatusPedido());
@@ -164,6 +175,27 @@ class PagamentoServiceTest {
                 .nome("Anthony Samuel Joaquim Teixeira")
                 .email("anthony.samuel.teixeira@said.adv.br")
                 .cpf("143.025.400-95")
+                .build();
+    }
+
+    private EventDTO setEventDTO() {
+        return EventDTO.builder()
+                .id(12345L)
+                .liveMode(true)
+                .type("payment")
+                .dateCreated("2015-03-25T10:04:58.396-04:00")
+                .userId(44444L)
+                .apiVersion("v1")
+                .action("payment.created")
+                .data(DataDTO.builder().id("999999999").build())
+                .build();
+    }
+
+    private MerchantOrderDTO setMerchantOrderDTO() {
+        return MerchantOrderDTO.builder()
+                .id(12345L)
+                .externalReference("123456")
+                .status("ok")
                 .build();
     }
 
