@@ -43,7 +43,7 @@ public class PedidoService {
 
     @Transactional
     public Pedido save(PedidoDTO pedidoDTO) {
-        log.info("Salvando pedido {}", pedidoDTO);
+        log.info("Salvando pedido {}", pedidoDTO.getId());
         final var produtoList = mapProductListDtoToEntityList(pedidoDTO.getProdutos());
         validateExistingClient(pedidoDTO);
         validateListProductsOrder(pedidoDTO);

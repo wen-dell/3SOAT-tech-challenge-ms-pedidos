@@ -1,6 +1,7 @@
 package br.com.tech.challenge.api;
 
 import br.com.tech.challenge.domain.dto.PagamentoDTO;
+import br.com.tech.challenge.domain.dto.external.EventDTO;
 import br.com.tech.challenge.servicos.PagamentoService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
@@ -40,9 +41,9 @@ public class PagamentoController {
             @ApiResponse(responseCode = "404", description = "Pedido não encontrado."),
             @ApiResponse(responseCode = "500", description = "Ocorreu um erro no servidor.")
     })
-    @PostMapping("/pedido/checkout")
-    public ResponseEntity<PagamentoDTO> checkout(@RequestParam("idPedido") Long id) {
-        var pagamento = pagamentoService.checkout(id);
+    @PostMapping("/checkout")
+    public ResponseEntity<PagamentoDTO> checkout(@RequestBody EventDTO event) {
+        var pagamento = pagamentoService.checkout(event);
         return ResponseEntity.ok().body(mapper.map(pagamento, PagamentoDTO.class));
     }
 

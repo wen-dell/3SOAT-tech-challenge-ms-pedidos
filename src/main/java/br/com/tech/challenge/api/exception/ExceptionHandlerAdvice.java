@@ -1,6 +1,7 @@
 package br.com.tech.challenge.api.exception;
 
 import br.com.tech.challenge.domain.dto.ResponseExceptionDTO;
+import feign.FeignException;
 import lombok.Generated;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -70,6 +71,27 @@ public class ExceptionHandlerAdvice {
                         .exceptionMessage(exception.getMessage())
                         .messages(null)
                         .statusCode(HttpStatus.INTERNAL_SERVER_ERROR.value())
+                        .build());
+    }
+
+    @ExceptionHandler(FeignException.class)
+    @ResponseStatus(HttpStatus.INTERNAL_SERVER_ERROR)
+    public ResponseEntity<ResponseExceptionDTO> feignExceptionHandler(FeignException exception) {
+        return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                .body(ResponseExceptionDTO.builder()
+                        .exceptionMessage(exception.getMessage())
+                        .messages(null)
+                        .statusCode(HttpStatus.INTERNAL_SERVER_ERROR.value())
+                        .build());
+    }
+
+    @ExceptionHandler(PedidoNotFoundException.class)
+    public ResponseEntity<ResponseExceptionDTO> handleInvalidCpfException(PedidoNotFoundException exception) {
+        return ResponseEntity.status(HttpStatus.NOT_FOUND)
+                .body(ResponseExceptionDTO.builder()
+                        .exceptionMessage(exception.getMessage())
+                        .messages(null)
+                        .statusCode(HttpStatus.NOT_FOUND.value())
                         .build());
     }
 

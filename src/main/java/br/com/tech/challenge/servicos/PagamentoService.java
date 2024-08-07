@@ -2,9 +2,11 @@ package br.com.tech.challenge.servicos;
 
 import br.com.tech.challenge.api.client.MercadoPagoClient;
 import br.com.tech.challenge.api.exception.ObjectNotFoundException;
+import br.com.tech.challenge.api.exception.PedidoNotFoundException;
 import br.com.tech.challenge.bd.repositorios.PagamentoRepository;
 import br.com.tech.challenge.bd.repositorios.PedidoRepository;
 import br.com.tech.challenge.domain.dto.external.CashOutDTO;
+import br.com.tech.challenge.domain.dto.external.EventDTO;
 import br.com.tech.challenge.domain.dto.external.ItemDTO;
 import br.com.tech.challenge.domain.dto.external.MercadoPagoRequestDTO;
 import br.com.tech.challenge.domain.entidades.Pagamento;
@@ -35,6 +37,8 @@ public class PagamentoService {
     private final PedidoRepository pedidoRepository;
 
     private final ProdutoService produtoService;
+
+    private final CozinhaTopicProducer cozinhaTopicProducer;
 
     @Transactional
     public Pagamento save(Pedido pedido) {
@@ -69,10 +73,17 @@ public class PagamentoService {
     }
 
     @Transactional
-    public Pagamento checkout(Long idPedido) {
-        log.info("Checkout de pedido [via integracao MercadoPago] {}", idPedido);
-        var pedido = getPedido(idPedido);
-        var pagamento = findPagamentoByPedidoId(pedido.getId());
+    public Pagamento checkout(EventDTO event) {
+        log.info("Evento {}", event);
+        log.info("ID do pedido do Mercado Pago {}", event.getData().getId());
+
+        var merchantOrderDTO = mercadoPagoClient.getMerchantOrder(event.getData().getId());
+        var senhaRetirada = Integer.parseInt(merchantOrderDTO.getExternalReference());
+
+        var pedido = pedidoRepository.findBySenhaRetirada(senhaRetirada)
+                .orElseThrow(() -> new PedidoNotFoundException("Pedido não encontrado atraves da senha retirada informada"));
+
+        var pagamento = pedido.getPagamento();
 
         log.info("Alterando status do pagamento para PAGO");
         pagamento.setStatusPagamento(StatusPagamento.PAGO);
@@ -81,7 +92,13 @@ public class PagamentoService {
         log.info("Alterando status do pedido para EM_PREPARACAO");
         pedido.setStatusPedido(StatusPedido.EM_PREPARACAO);
         pedidoRepository.save(pedido);
-        return pagamentoRepository.save(pagamento);
+
+        final var pagamentoSaved = pagamentoRepository.save(pagamento);
+
+        log.info("Enviando pedido {} para cozinha", pagamentoSaved.getPedido().getId());
+        cozinhaTopicProducer.enviarPedidoParaCozinha(pagamentoSaved.getId());
+
+        return pagamentoSaved;
     }
 
     @Generated
@@ -101,7 +118,7 @@ public class PagamentoService {
                     .unitPrice(produto.getValorUnitario())
                     .quantity(count)
                     .unitMeasure("unit")
-                    .totalAmount(produto.getValorUnitario().multiply(BigDecimal.valueOf(count)))
+                    .totalAmount(produto.getValorUnitario())
                     .build()
             );
         });
@@ -112,9 +129,9 @@ public class PagamentoService {
                 .externalReference(pedido.getSenhaRetirada().toString())
                 .title("Ordem de pedido")
                 .description(String.format("Pagamento %d do Pedido %d", pagamento.getId(), pedido.getId()))
-                .totalAmount(pagamento.getValorTotal().multiply(BigDecimal.valueOf(2L)))
+                .totalAmount(pagamento.getValorTotal())
                 .items(items)
-                .cashOut(CashOutDTO.builder().amount(pagamento.getValorTotal()).build())
+                .cashOut(CashOutDTO.builder().amount(BigDecimal.ZERO).build())
                 .build();
     }
 
